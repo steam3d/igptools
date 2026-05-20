@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Points Tools</title>
+  <link rel="stylesheet" href="./water.css">
+  <style>
+    .table-wrap {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #gpx-cnx-result details,
+    #cnx-edit-result details {
+      display: block;
+    }
+
+    #gpx-cnx-result .table-wrap table,
+    #cnx-edit-result .table-wrap table {
+      width: max-content;
+      min-width: 100%;
+      table-layout: auto;
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">      
+      <h1>iGPTOOLS</h1>
+      <p>
+        A set of utilities for converting waypoints and routes for iGPSPORT BiNavi and
+        BiNavi Air devices.
+      </p>
+    </header>
+
+    <section class="mode-switch" aria-label="Tool mode">
+      <button class="mode-tab" type="button" data-mode-target="convert" aria-selected="true">
+        GPX POI to Location Points
+      </button>
+      <button class="mode-tab" type="button" data-mode-target="read" aria-selected="false">
+        Location Points to GPX POI
+      </button>
+      <button class="mode-tab" type="button" data-mode-target="gpx-cnx" aria-selected="false">
+        GPX to CNX
+      </button>
+      <button class="mode-tab" type="button" data-mode-target="cnx-edit" aria-selected="false">
+        CNX Point Editor
+      </button>
+      <button
+        class="mode-tab"
+        type="button"
+        onclick="window.open('https://ag79.github.io/yndx-gpx-web/', '_blank', 'noopener,noreferrer')"
+      >
+        Yandex Maps to GPX ↗
+      </button>
+    </section>
+    <hr>
+
+    <section id="mode-convert" class="panel mode-panel">
+      <h2>GPX POI to Location Points</h2>
+      <p>
+        Converts waypoints from a GPX file into the iGPSPORT location points format.
+        Upload a GPX file, download the generated <code>location.dat</code> and
+        <code>point_name_list.dat</code> files after conversion, then copy them to the
+        <code>iGPSPORT/System</code> folder on your device and replace the existing files.
+      </p>
+      <form id="convert-form">
+        <label for="source-file">GPX file</label>
+        <input
+          id="source-file"
+          name="source-file"
+          type="file"
+          accept=".gpx,application/gpx+xml"
+          required
+        >
+
+        <label for="trim-name">Trim names to N characters</label>
+        <input
+          id="trim-name"
+          name="trim-name"
+          type="number"
+          min="0"
+          step="1"
+          value="12"
+          placeholder="Leave blank to keep full names"
+        >
+
+        <button type="submit">Convert</button>
+      </form>
+
+      <p id="convert-status" class="status" role="status" aria-live="polite"></p>
+
+      <section id="convert-result" class="result" hidden>
+        <details open>
+          <summary>Preview points</summary>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Latitude</th>
+                  <th>Longitude</th>
+                </tr>
+              </thead>
+              <tbody id="convert-table-body"></tbody>
+            </table>
+          </div>
+        </details>
+
+        <div class="downloads">
+          <button id="download-location" type="button" disabled>Download location.dat</button>
+          <a id="download-location-link" download="location.dat" hidden></a>
+          <button id="download-names" type="button" disabled>Download point_name_list.dat</button>
+          <a id="download-names-link" download="point_name_list.dat" hidden></a>
+        </div>
+      </section>
+    </section>
+
+    <section id="mode-read" class="panel mode-panel" hidden>
+      <h2>Location Points to GPX POI</h2>
+      <p>
+        Converts iGPSPORT location points into a GPX file. Select the
+        <code>location.dat</code> and <code>point_name_list.dat</code> files from the
+        <code>iGPSPORT/System</code> folder on your device and download the generated GPX
+        file after conversion.
+      </p>
+      <form id="read-form">
+        <label for="location-file">location.dat</label>
+        <input
+          id="location-file"
+          name="location-file"
+          type="file"
+          accept=".dat,application/octet-stream"
+          required
+        >
+
+        <label for="names-file">point_name_list.dat</label>
+        <input
+          id="names-file"
+          name="names-file"
+          type="file"
+          accept=".dat,application/octet-stream"
+          required
+        >
+        <p class="hint">
+          Both device files are required so the tool can restore waypoint names and coordinates.
+        </p>
+
+        <button type="submit">Convert</button>
+      </form>
+
+      <p id="read-status" class="status" role="status" aria-live="polite"></p>
+
+      <section id="read-result" class="result" hidden>
+        <details open>
+          <summary>Preview points</summary>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Latitude</th>
+                  <th>Longitude</th>
+                </tr>
+              </thead>
+              <tbody id="read-table-body"></tbody>
+            </table>
+          </div>
+        </details>
+
+        <div class="downloads">
+          <button id="download-gpx" type="button" disabled>Download points.gpx</button>
+          <a id="download-gpx-link" download="points.gpx" hidden></a>
+        </div>
+      </section>
+    </section>
+
+    <section id="mode-gpx-cnx" class="panel mode-panel" hidden>
+      <h2>GPX to CNX</h2>
+      <p>
+        Converts a GPX route into CNX format for iGPSPORT devices. Upload a GPX file,
+        edit waypoints if needed, then download the generated CNX file and copy it to the
+        <code>iGPSPORT/Routes</code> folder on your device.
+      </p>
+      <form id="gpx-cnx-form">
+        <label for="gpx-cnx-file">GPX file</label>
+        <input
+          id="gpx-cnx-file"
+          name="gpx-cnx-file"
+          type="file"
+          accept=".gpx,application/gpx+xml"
+          required
+        >
+
+        <button type="submit">Upload</button>
+      </form>
+
+      <p id="gpx-cnx-status" class="status" role="status" aria-live="polite"></p>
+
+      <section id="gpx-cnx-result" class="result" hidden>
+        <p class="hint">
+          Edit names and types in the table.
+        </p>
+
+        <details open>
+          <summary>Edit points</summary>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Latitude</th>
+                  <th>Longitude</th>
+                </tr>
+              </thead>
+              <tbody id="gpx-cnx-table-body"></tbody>
+            </table>
+          </div>
+        </details>
+
+        <div class="downloads">
+          <button id="download-gpx-cnx" type="button" disabled>Download CNX</button>
+          <a id="download-gpx-cnx-link" download="route_points.cnx" hidden></a>
+        </div>
+      </section>
+    </section>
+
+    <section id="mode-cnx-edit" class="panel mode-panel" hidden>
+      <h2>CNX Point Editor</h2>
+      <p>
+        Allows editing waypoint points inside a CNX route. Upload a CNX file, edit the
+        points, download the updated file, and copy it back to the
+        <code>iGPSPORT/Routes</code> folder on your device.
+      </p>
+      <form id="cnx-edit-form">
+        <label for="cnx-edit-file">CNX file</label>
+        <input
+          id="cnx-edit-file"
+          name="cnx-edit-file"
+          type="file"
+          accept=".cnx,application/xml,text/xml"
+          required
+        >
+
+        <button type="submit">Upload</button>
+      </form>
+
+      <p id="cnx-edit-status" class="status" role="status" aria-live="polite"></p>
+
+      <section id="cnx-edit-result" class="result" hidden>
+        <p class="hint">
+          Edit names and types in the table.
+        </p>
+
+        <details open>
+          <summary>Edit points</summary>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Latitude</th>
+                  <th>Longitude</th>
+                </tr>
+              </thead>
+              <tbody id="cnx-edit-table-body"></tbody>
+            </table>
+          </div>
+        </details>
+
+        <div class="downloads">
+          <button id="download-cnx-edit" type="button" disabled>Download CNX</button>
+          <a id="download-cnx-edit-link" download="edited_route.cnx" hidden></a>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
