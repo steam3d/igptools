@@ -52,6 +52,9 @@
       <button class="mode-tab" type="button" data-mode-target="cnx-edit" aria-selected="false">
         CNX Point Editor
       </button>
+      <button class="mode-tab" type="button" data-mode-target="update-maps" aria-selected="false">
+        Update maps
+      </button>
       <button
         class="mode-tab"
         type="button"
@@ -285,6 +288,63 @@
           <a id="download-cnx-edit-link" download="edited_route.cnx" hidden></a>
         </div>
       </section>
+    </section>
+
+    <section id="mode-update-maps" class="panel mode-panel" hidden>
+      <h2>Updating Maps on iGPSPORT BiNavi</h2>
+      <ol>
+        <li>
+          Download the latest maps for your region from
+          <a
+            href="https://www.igpsport.com/ru/support/product/map?id=1063&amp;name=BiNavi&amp;mapVersionId=a959751a-21b5-44a3-b713-bc12ebb208ef&amp;utm_source=chatgpt.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >iGPSPORT BiNavi Map Download</a>.
+        </li>
+        <li>
+          Extract the archive. Inside you will find two folders:
+          <ul>
+            <li><strong>Maps</strong> - map files;</li>
+            <li><strong>Router</strong> - routing files.</li>
+          </ul>
+        </li>
+        <li>
+          Turn off the device and connect it to your computer or OTG-enabled smartphone.
+        </li>
+        <li>
+          Open the <strong>Maps</strong> folder from the extracted archive and locate the
+          files for your region.
+          <p>Example:</p>
+          <p><code>RU05002511203HE0EV0YA1OU.map</code></p>
+          <p>
+            Here, <strong>RU05</strong> is the region code and
+            <strong>3HE0EV0YA1OU</strong> is the geo code.
+          </p>
+        </li>
+        <li>
+          Open the <code>iGPSPORT/Maps</code> folder on the device and find the files with
+          the same region code (<strong>RU05</strong> in this example) and a geo code at
+          the end of the filename.
+        </li>
+        <li>
+          Create a backup of these files, delete them from the device, and copy the new
+          files from the archive's <strong>Maps</strong> folder.
+          <p>
+            <strong>Warning:</strong> Do not delete or replace region files that do not
+            contain a geo code. For example, <code>RU05A0260220.map</code> should not be
+            modified.
+          </p>
+        </li>
+        <li>
+          Open the <code>iGPSPORT/Router</code> folder on the device, create a backup of
+          the existing files, then copy the files from the archive's
+          <strong>Router</strong> folder and allow them to overwrite the existing files.
+        </li>
+        <li>
+          Safely disconnect the device and power it on. If any issues occur, restore the
+          files from your backup.
+        </li>
+      </ol>
     </section>
   </main>
 

@@ -25,6 +25,7 @@ const modePanels = {
   read: document.querySelector("#mode-read"),
   "gpx-cnx": document.querySelector("#mode-gpx-cnx"),
   "cnx-edit": document.querySelector("#mode-cnx-edit"),
+  "update-maps": document.querySelector("#mode-update-maps"),
 };
 
 const convertForm = document.querySelector("#convert-form");
