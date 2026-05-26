@@ -49,6 +49,9 @@
       <button class="mode-tab" type="button" data-mode-target="gpx-cnx" aria-selected="false">
         GPX to CNX
       </button>
+      <button class="mode-tab" type="button" data-mode-target="gpx-cleaner" aria-selected="false">
+        GPX Cleaner
+      </button>
       <button class="mode-tab" type="button" data-mode-target="cnx-edit" aria-selected="false">
         CNX Point Editor
       </button>
@@ -236,6 +239,28 @@
           <a id="download-gpx-cnx-link" download="route_points.cnx" hidden></a>
         </div>
       </section>
+    </section>
+
+    <section id="mode-gpx-cleaner" class="panel mode-panel" hidden>
+      <h2>GPX Cleaner</h2>
+      <p>
+        Clean your GPX file and keep only POIs, routes/tracks, and elevation data.
+      </p>
+      <form id="gpx-cleaner-form">
+        <label for="gpx-cleaner-file">GPX file</label>
+        <input
+          id="gpx-cleaner-file"
+          name="gpx-cleaner-file"
+          type="file"
+          accept=".gpx,application/gpx+xml"
+          required
+        >
+
+        <button type="submit">Clean</button>
+      </form>
+
+      <p id="gpx-cleaner-status" class="status" role="status" aria-live="polite"></p>
+      <a id="download-gpx-cleaner-link" download="cleaned_route.gpx" hidden></a>
     </section>
 
     <section id="mode-cnx-edit" class="panel mode-panel" hidden>

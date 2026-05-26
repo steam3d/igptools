@@ -18,12 +18,19 @@ import {
   parseGpxForCnxText,
   parseCnxText,
 } from "./cnx-format.js";
+import {
+  CLEANED_GPX_FILE,
+  CLEANED_GPX_MIME_TYPE,
+  buildCleanedGpxDownloadName,
+  cleanGpxText,
+} from "./gpx-cleaner.js";
 
 const modeTabs = Array.from(document.querySelectorAll(".mode-tab[data-mode-target]"));
 const modePanels = {
   convert: document.querySelector("#mode-convert"),
   read: document.querySelector("#mode-read"),
   "gpx-cnx": document.querySelector("#mode-gpx-cnx"),
+  "gpx-cleaner": document.querySelector("#mode-gpx-cleaner"),
   "cnx-edit": document.querySelector("#mode-cnx-edit"),
   "update-maps": document.querySelector("#mode-update-maps"),
 };
@@ -31,11 +38,13 @@ const modePanels = {
 const convertForm = document.querySelector("#convert-form");
 const readForm = document.querySelector("#read-form");
 const gpxCnxForm = document.querySelector("#gpx-cnx-form");
+const gpxCleanerForm = document.querySelector("#gpx-cleaner-form");
 const cnxEditForm = document.querySelector("#cnx-edit-form");
 
 const convertStatus = document.querySelector("#convert-status");
 const readStatus = document.querySelector("#read-status");
 const gpxCnxStatus = document.querySelector("#gpx-cnx-status");
+const gpxCleanerStatus = document.querySelector("#gpx-cleaner-status");
 const cnxEditStatus = document.querySelector("#cnx-edit-status");
 
 const convertResult = document.querySelector("#convert-result");
@@ -58,6 +67,7 @@ const downloadLocationLink = document.querySelector("#download-location-link");
 const downloadNamesLink = document.querySelector("#download-names-link");
 const downloadGpxLink = document.querySelector("#download-gpx-link");
 const downloadGpxCnxLink = document.querySelector("#download-gpx-cnx-link");
+const downloadGpxCleanerLink = document.querySelector("#download-gpx-cleaner-link");
 const downloadCnxEditLink = document.querySelector("#download-cnx-edit-link");
 
 const objectUrls = new Map();
@@ -391,6 +401,44 @@ gpxCnxForm.addEventListener("submit", async (event) => {
     setStatus(gpxCnxStatus, "Points loaded. Edit names or types and download the CNX file.", "success");
   } catch (error) {
     setStatus(gpxCnxStatus, error instanceof Error ? error.message : String(error), "error");
+  }
+});
+
+gpxCleanerForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  clearStatus(gpxCleanerStatus);
+
+  try {
+    const sourceFile = gpxCleanerForm.elements["gpx-cleaner-file"].files[0];
+
+    if (!sourceFile) {
+      throw new Error("Choose a GPX file first.");
+    }
+
+    const sourceText = await sourceFile.text();
+    const cleaned = cleanGpxText(sourceText);
+    const downloadName = sourceFile.name
+      ? buildCleanedGpxDownloadName(sourceFile.name)
+      : CLEANED_GPX_FILE;
+
+    setDownload(
+      downloadGpxCleanerLink,
+      "download-gpx-cleaner",
+      cleaned.gpxText,
+      downloadName,
+      CLEANED_GPX_MIME_TYPE
+    );
+    downloadGpxCleanerLink.click();
+
+    console.info(
+      "GPX cleaner summary:",
+      {
+        fileName: sourceFile.name,
+        ...cleaned.summary,
+      }
+    );
+  } catch (error) {
+    setStatus(gpxCleanerStatus, error instanceof Error ? error.message : String(error), "error");
   }
 });
 

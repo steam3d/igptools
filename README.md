@@ -7,6 +7,7 @@ A set of utilities for working with waypoints and routes on `iGPSPORT BiNavi` an
 - Convert `GPX` waypoints into `location.dat` and `point_name_list.dat`
 - Convert `location.dat` and `point_name_list.dat` back into `GPX`
 - Convert `GPX` routes into `CNX` format
+- Clean `GPX` files by keeping only POI, route geometry, and elevation data
 - Edit waypoints and POI types inside `CNX` files
 
 ## Supported Devices
