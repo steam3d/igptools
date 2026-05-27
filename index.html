@@ -27,6 +27,54 @@
       min-width: 100%;
       table-layout: auto;
     }
+
+    #gpx-cnx-result td,
+    #gpx-cnx-result th,
+    #cnx-edit-result td,
+    #cnx-edit-result th {
+      vertical-align: middle;
+    }
+
+    #gpx-cnx-result td input,
+    #gpx-cnx-result td select,
+    #cnx-edit-result td input,
+    #cnx-edit-result td select {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
+    .poi-icon-cell {
+      width: 2.5rem;
+      min-width: 2.5rem;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .poi-icon-preview {
+      display: inline-block;
+      line-height: 0;
+    }
+
+    .poi-icon-thumb {
+      display: inline-block;
+      width: 23px;
+      height: 27px;
+      object-fit: contain;
+      vertical-align: middle;
+    }
+
+    .poi-icon-fallback {
+      display: inline-block;
+      padding: 0 0.25rem;
+      font-size: 0.75rem;
+      line-height: 1.2;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .poi-type-select {
+      min-width: 14rem;
+    }
   </style>
 </head>
 <body>
@@ -193,7 +241,8 @@
       <h2>GPX to CNX</h2>
       <p>
         Converts a GPX route into CNX format for iGPSPORT devices. Upload a GPX file,
-        edit waypoints if needed, then download the generated CNX file and copy it to the
+        all tracks and track segments will be merged into one CNX route, edit waypoints if
+        needed, then download the generated CNX file and copy it to the
         <code>iGPSPORT/Routes</code> folder on your device.
       </p>
       <form id="gpx-cnx-form">
@@ -223,6 +272,7 @@
               <thead>
                 <tr>
                   <th>ID</th>
+                  <th>Icon</th>
                   <th>Name</th>
                   <th>Type</th>
                   <th>Latitude</th>
@@ -297,6 +347,7 @@
               <thead>
                 <tr>
                   <th>ID</th>
+                  <th>Icon</th>
                   <th>Name</th>
                   <th>Type</th>
                   <th>Latitude</th>

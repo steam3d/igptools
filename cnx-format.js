@@ -1,28 +1,33 @@
 export const CNX_MIME_TYPE = "application/xml;charset=utf-8";
+
+function poiType(code, name, iconFile) {
+  return { code, name, iconFile };
+}
+
 export const POI_TYPES = [
-  { code: "0", name: "Waypoint" },
-  { code: "1", name: "Sprint Point" },
-  { code: "2", name: "HC Climb" },
-  { code: "3", name: "Level 1 Climb" },
-  { code: "4", name: "Level 2 Climb" },
-  { code: "5", name: "Level 3 Climb" },
-  { code: "6", name: "Level 4 Climb" },
-  { code: "7", name: "Supply Point" },
-  { code: "8", name: "Garbage recycle area" },
-  { code: "9", name: "Restroom" },
-  { code: "10", name: "Service Point" },
-  { code: "11", name: "Medical Aid Station" },
-  { code: "12", name: "Equipment Area" },
-  { code: "13", name: "Shop" },
-  { code: "14", name: "Meeting Point" },
-  { code: "15", name: "Viewing Platform" },
-  { code: "16", name: "Instagram-Worthy Location" },
-  { code: "17", name: "Tunnel" },
-  { code: "18", name: "Valley" },
-  { code: "19", name: "Dangerous Road" },
-  { code: "20", name: "Sharp Turn" },
-  { code: "21", name: "Steep Slope" },
-  { code: "22", name: "Intersection" },
+  poiType("0", "Waypoint", "waypoint.png"),
+  poiType("1", "Sprint Point", "sprint-point.png"),
+  poiType("2", "HC Climb", "hc-climb.png"),
+  poiType("3", "Level 1 Climb", "level-1-climb.png"),
+  poiType("4", "Level 2 Climb", "level-2-climb.png"),
+  poiType("5", "Level 3 Climb", "level-3-climb.png"),
+  poiType("6", "Level 4 Climb", "level-4-climb.png"),
+  poiType("7", "Supply Point", "supply-point.png"),
+  poiType("8", "Garbage recycle area", "garbage-recycle-area.png"),
+  poiType("9", "Restroom", "restroom.png"),
+  poiType("10", "Service Point", "service-point.png"),
+  poiType("11", "Medical Aid Station", "medical-aid-station.png"),
+  poiType("12", "Equipment Area", "equipment-area.png"),
+  poiType("13", "Shop", "shop.png"),
+  poiType("14", "Meeting Point", "meeting-point.png"),
+  poiType("15", "Viewing Platform", "viewing-platform.png"),
+  poiType("16", "Instagram-Worthy Location", "instagram-worthy-location.png"),
+  poiType("17", "Tunnel", "tunnel.png"),
+  poiType("18", "Valley", "valley.png"),
+  poiType("19", "Dangerous Road", "dangerous-road.png"),
+  poiType("20", "Sharp Turn", "sharp-turn.png"),
+  poiType("21", "Steep Slope", "steep-slope.png"),
+  poiType("22", "Intersection", "intersection.png"),
 ];
 
 const EARTH_RADIUS_METERS = 6371 * 1000;

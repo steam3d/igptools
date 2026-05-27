@@ -75,6 +75,12 @@ const editors = {
   gpxCnx: null,
   cnxEdit: null,
 };
+const POI_TYPE_BY_CODE = new Map(POI_TYPES.map((type) => [type.code, type]));
+const POI_ICON_URL_BY_CODE = new Map(
+  POI_TYPES
+    .filter((type) => type.iconFile)
+    .map((type) => [type.code, new URL(`./ic/${type.iconFile}`, import.meta.url).href])
+);
 
 function revokeObjectUrl(key) {
   const current = objectUrls.get(key);
@@ -116,6 +122,82 @@ function formatCoordinate(value) {
   return value.toFixed(7);
 }
 
+function getPoiType(typeCode) {
+  return POI_TYPE_BY_CODE.get(String(typeCode)) ?? null;
+}
+
+function getPoiTypeLabel(typeCode) {
+  const type = getPoiType(typeCode);
+
+  if (type) {
+    return `${type.name} (type ${type.code})`;
+  }
+
+  return `Unknown type (${typeCode})`;
+}
+
+function getPoiIconUrl(typeCode) {
+  return POI_ICON_URL_BY_CODE.get(String(typeCode)) ?? null;
+}
+
+function createPoiIconPreview(point) {
+  const preview = document.createElement("div");
+  const icon = document.createElement("img");
+  const fallback = document.createElement("span");
+  let currentIconUrl = null;
+
+  preview.className = "poi-icon-preview";
+  icon.className = "poi-icon-thumb";
+  fallback.className = "poi-icon-fallback";
+  fallback.hidden = true;
+  preview.append(icon, fallback);
+
+  function showFallback(text, label) {
+    currentIconUrl = null;
+    icon.hidden = true;
+    icon.removeAttribute("src");
+    icon.alt = "";
+    fallback.hidden = false;
+    fallback.textContent = text;
+    preview.setAttribute("aria-label", label);
+    preview.title = label;
+  }
+
+  function update() {
+    const label = getPoiTypeLabel(point.type);
+    const iconUrl = getPoiIconUrl(point.type);
+
+    if (!iconUrl) {
+      showFallback(String(point.type).trim() ? `#${point.type}` : "?", label);
+      return;
+    }
+
+    currentIconUrl = iconUrl;
+    fallback.hidden = true;
+    icon.hidden = false;
+    icon.alt = label;
+    icon.src = iconUrl;
+    preview.setAttribute("aria-label", label);
+    preview.title = label;
+  }
+
+  icon.addEventListener("error", () => {
+    if (!currentIconUrl || icon.currentSrc !== currentIconUrl) {
+      return;
+    }
+
+    console.warn(`POI icon asset is missing for ${getPoiTypeLabel(point.type)}.`);
+    showFallback("!", `Missing icon for ${getPoiTypeLabel(point.type)}`);
+  });
+
+  update();
+
+  return {
+    element: preview,
+    update,
+  };
+}
+
 function renderTable(tbody, points) {
   tbody.textContent = "";
 
@@ -141,6 +223,7 @@ function renderEditablePoiTable(tbody, points, onChange) {
 
   points.forEach((point) => {
     const row = document.createElement("tr");
+    const iconCell = document.createElement("td");
     const idCell = document.createElement("td");
     const nameCell = document.createElement("td");
     const typeCell = document.createElement("td");
@@ -148,7 +231,9 @@ function renderEditablePoiTable(tbody, points, onChange) {
     const lonCell = document.createElement("td");
     const nameInput = document.createElement("input");
     const typeSelect = document.createElement("select");
+    const iconPreview = createPoiIconPreview(point);
 
+    iconCell.className = "poi-icon-cell";
     idCell.textContent = String(point.id);
 
     nameInput.type = "text";
@@ -174,18 +259,21 @@ function renderEditablePoiTable(tbody, points, onChange) {
     });
 
     typeSelect.value = point.type;
+    typeSelect.className = "poi-type-select";
     typeSelect.setAttribute("aria-label", `Point ${point.id} type`);
     typeSelect.addEventListener("change", () => {
       point.type = typeSelect.value;
+      iconPreview.update();
       onChange();
     });
 
     latCell.textContent = formatCoordinate(point.lat);
     lonCell.textContent = formatCoordinate(point.lon);
 
+    iconCell.append(iconPreview.element);
     nameCell.append(nameInput);
     typeCell.append(typeSelect);
-    row.append(idCell, nameCell, typeCell, latCell, lonCell);
+    row.append(idCell, iconCell, nameCell, typeCell, latCell, lonCell);
     tbody.append(row);
   });
 }
