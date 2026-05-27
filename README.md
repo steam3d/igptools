@@ -66,8 +66,11 @@ Important: names are matched to coordinates by file position, not by `id`.
 
 Implementation based on:
 https://github.com/LudvvigB/GPXtoCNXConverter
+https://github.com/sidkurt/GPXtoCNXConverter
 
 The original logic was adapted and rewritten in JavaScript.
+During GPX to CNX conversion, all `trk` and `trkseg` sections are merged into a single
+CNX track, matching the behavior of the newer Python implementation.
 
 ## Additional
 

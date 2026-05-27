@@ -394,7 +394,9 @@ gpxCnxForm.addEventListener("submit", async (event) => {
     renderEditablePoiTable(gpxCnxTableBody, editors.gpxCnx.points, refreshGpxCnxDownload);
     refreshGpxCnxDownload();
     console.info(
-      `Loaded ${parsed.points.length} point(s) and ${parsed.route.tracksCount} track point(s) from ${sourceFile.name} for CNX export. ` +
+      `Loaded ${parsed.points.length} point(s), ${parsed.route.tracksCount} track point(s), ` +
+      `${parsed.route.sourceSegmentsCount} track segment(s), and ${parsed.route.sourceTracksCount} track(s) from ` +
+      `${sourceFile.name} for CNX export. ` +
       `Generated download ${editors.gpxCnx.downloadName}.`
     );
     gpxCnxResult.hidden = false;

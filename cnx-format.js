@@ -54,6 +54,10 @@ function findFirstChildByLocalName(element, tagName) {
   return null;
 }
 
+function findChildElementsByLocalName(element, tagName) {
+  return Array.from(element.children).filter((child) => localName(child) === tagName);
+}
+
 function findFirstChildTextByLocalName(element, tagName) {
   const child = findFirstChildByLocalName(element, tagName);
   return child ? child.textContent : null;
@@ -350,6 +354,56 @@ function buildRouteMetadata(trackPoints, routeId = "Route") {
   };
 }
 
+function collectTrackPointsForCnx(documentNode, fileName = "") {
+  const rootElement = documentNode.documentElement;
+  const trackElements = rootElement ? findChildElementsByLocalName(rootElement, "trk") : [];
+  const firstTrackElement = trackElements[0] ?? null;
+  const routeId = String(
+    (firstTrackElement
+      ? (findFirstChildTextByLocalName(firstTrackElement, "name") ?? "Unknown")
+      : null) ??
+    String(fileName).replace(/\.[^.]+$/u, "") ??
+    "Route"
+  ) || "Route";
+  const trackPoints = [];
+  let sourceSegmentsCount = 0;
+
+  trackElements.forEach((trackElement) => {
+    const trackSegmentElements = findChildElementsByLocalName(trackElement, "trkseg");
+
+    trackSegmentElements.forEach((trackSegmentElement) => {
+      sourceSegmentsCount += 1;
+
+      findChildElementsByLocalName(trackSegmentElement, "trkpt").forEach((trackPointElement) => {
+        const pointNumber = trackPoints.length + 1;
+        const latText = trackPointElement.getAttribute("lat");
+        const lonText = trackPointElement.getAttribute("lon");
+        const eleText = String(findFirstChildTextByLocalName(trackPointElement, "ele") ?? "0").trim();
+
+        if (latText === null || lonText === null) {
+          throw new Error(`Track point ${pointNumber} is missing lat/lon.`);
+        }
+
+        trackPoints.push({
+          lat: parseCoordinate(latText, pointNumber, "latitude"),
+          lon: parseCoordinate(lonText, pointNumber, "longitude"),
+          ele: parseCoordinate(eleText, pointNumber, "elevation"),
+          latText: String(latText).trim(),
+          lonText: String(lonText).trim(),
+          eleText,
+        });
+      });
+    });
+  });
+
+  return {
+    routeId,
+    sourceTracksCount: trackElements.length,
+    sourceSegmentsCount,
+    trackPoints,
+  };
+}
+
 function buildPointElement(documentNode, point) {
   const pointElement = documentNode.createElement("Point");
   const latElement = documentNode.createElement("Lat");
@@ -371,7 +425,7 @@ function serializeRoute(routeElement) {
     throw new Error("XMLSerializer is not available in this browser.");
   }
 
-  return `\ufeff<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n${new XMLSerializer().serializeToString(routeElement)}\n`;
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n${new XMLSerializer().serializeToString(routeElement)}\n`;
 }
 
 export function parseCnxText(xmlText) {
@@ -418,19 +472,8 @@ export function parseCnxText(xmlText) {
 
 export function parseGpxForCnxText(xmlText, fileName = "") {
   const documentNode = ensureXmlDocument(xmlText, "Invalid GPX/XML file.");
-  const waypointElements = findElementsByLocalName(documentNode, "wpt");
-  const trackElement = findElementsByLocalName(documentNode, "trk")[0] ?? null;
-  const trackSegmentElement = trackElement ? findFirstChildByLocalName(trackElement, "trkseg") : null;
-  const trackPointElements = trackSegmentElement
-    ? Array.from(trackSegmentElement.children).filter((element) => localName(element) === "trkpt")
-    : [];
-  const routeId = String(
-    (trackElement
-      ? (findFirstChildTextByLocalName(trackElement, "name") ?? "Unknown")
-      : null) ??
-    String(fileName).replace(/\.[^.]+$/u, "") ??
-    "Route"
-  ) || "Route";
+  const rootElement = documentNode.documentElement;
+  const waypointElements = rootElement ? findChildElementsByLocalName(rootElement, "wpt") : [];
   const points = waypointElements.map((waypointElement, index) => {
     const pointNumber = index + 1;
     const latText = waypointElement.getAttribute("lat");
@@ -450,28 +493,15 @@ export function parseGpxForCnxText(xmlText, fileName = "") {
       lonText: String(lonText).trim(),
     };
   });
-  const trackPoints = trackPointElements.map((trackPointElement, index) => {
-    const pointNumber = index + 1;
-    const latText = trackPointElement.getAttribute("lat");
-    const lonText = trackPointElement.getAttribute("lon");
-
-    if (latText === null || lonText === null) {
-      throw new Error(`Track point ${pointNumber} is missing lat/lon.`);
-    }
-
-    return {
-      lat: parseCoordinate(latText, pointNumber, "latitude"),
-      lon: parseCoordinate(lonText, pointNumber, "longitude"),
-      ele: parseCoordinate(findFirstChildTextByLocalName(trackPointElement, "ele") ?? "0", pointNumber, "elevation"),
-      latText: String(latText).trim(),
-      lonText: String(lonText).trim(),
-      eleText: String(findFirstChildTextByLocalName(trackPointElement, "ele") ?? "0").trim(),
-    };
-  });
+  const { routeId, trackPoints, sourceTracksCount, sourceSegmentsCount } = collectTrackPointsForCnx(documentNode, fileName);
 
   return {
     points,
-    route: buildRouteMetadata(trackPoints, routeId),
+    route: {
+      ...buildRouteMetadata(trackPoints, routeId),
+      sourceTracksCount,
+      sourceSegmentsCount,
+    },
   };
 }
 
@@ -517,7 +547,7 @@ export function buildRouteCnxText(route, points) {
     "</Route>",
   ];
 
-  return `\ufeff<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n${body.join("\n")}\n`;
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n${body.join("\n")}\n`;
 }
 
 export function buildEditedCnxText(documentNode, points, routeId = null) {
